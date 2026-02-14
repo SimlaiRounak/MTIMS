@@ -28,7 +28,6 @@ services:
   - type: web
     name: mtims-client
     runtime: static
-    region: oregon
     plan: free
     rootDir: client
     buildCommand: npm install && npm run build
