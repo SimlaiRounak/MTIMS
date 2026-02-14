@@ -20,7 +20,22 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: config.clientUrl, credentials: true }));
+
+// CORS – support comma-separated CLIENT_URL for multiple origins
+const allowedOrigins = config.clientUrl
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      // allow server-to-server / same-origin requests (origin is undefined)
+      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      cb(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 

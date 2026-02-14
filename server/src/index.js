@@ -13,9 +13,14 @@ const startServer = async () => {
   const server = http.createServer(app);
 
   // Setup Socket.io
+  const allowedOrigins = config.clientUrl
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   const io = new Server(server, {
     cors: {
-      origin: config.clientUrl,
+      origin: allowedOrigins,
       methods: ['GET', 'POST'],
       credentials: true,
     },
