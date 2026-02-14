@@ -6,6 +6,7 @@ const StockMovement = require('./StockMovement');
 const Supplier = require('./Supplier');
 const PurchaseOrder = require('./PurchaseOrder');
 const Order = require('./Order');
+const RolePermission = require('./RolePermission');
 
 module.exports = {
   Tenant,
@@ -16,4 +17,5 @@ module.exports = {
   Supplier,
   PurchaseOrder,
   Order,
+  RolePermission,
 };

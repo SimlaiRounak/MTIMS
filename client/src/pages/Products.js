@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission } from '../utils/rbac';
 import { useSocket } from '../context/SocketContext';
 import Modal from '../components/Modal';
 import { Package, Eye, Trash2 } from 'lucide-react';
@@ -9,7 +10,7 @@ import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 const Products = () => {
-  const { canManage } = useAuth();
+  const { user } = useAuth();
   const { socket } = useSocket();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -128,7 +129,7 @@ const Products = () => {
     <div>
       <div className="page-header">
         <h2>Products</h2>
-        {canManage && (
+        {hasPermission(user, 'products:create') && (
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
             + New Product
           </button>
@@ -211,7 +212,7 @@ const Products = () => {
                           data-tooltip-id="table-tooltip" data-tooltip-content="View">
                           <Eye size={15} />
                         </button>
-                        {canManage && (
+                        {hasPermission(user, 'products:delete') && (
                           <button className="table-action-btn delete" onClick={() => handleDelete(product._id, product.name)}
                             data-tooltip-id="table-tooltip" data-tooltip-content="Delete">
                             <Trash2 size={15} />

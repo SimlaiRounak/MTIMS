@@ -88,6 +88,22 @@ export const purchaseOrdersAPI = {
   receive: (id, data) => api.post(`/purchase-orders/${id}/receive`, data),
 };
 
+// Users
+export const usersAPI = {
+  getAll: () => api.get('/users'),
+  get: (id) => api.get(`/users/${id}`),
+  updateRole: (id, role) => api.put(`/users/${id}/role`, { role }),
+  updateStatus: (id, isActive) => api.put(`/users/${id}/status`, { isActive }),
+  delete: (id) => api.delete(`/users/${id}`),
+  create: (data) => api.post('/auth/users', data),
+};
+
+// Roles & Permissions
+export const rolesAPI = {
+  getPermissions: () => api.get('/roles/permissions'),
+  updatePermissions: (role, permissions) => api.put(`/roles/${role}/permissions`, { permissions }),
+};
+
 // Dashboard
 export const dashboardAPI = {
   getSummary: () => api.get('/dashboard/summary'),

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { purchaseOrdersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission } from '../utils/rbac';
 import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
 
@@ -16,7 +17,7 @@ const statusBadge = (status) => {
 const PurchaseOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { canManage } = useAuth();
+  const { user } = useAuth();
   const [po, setPo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showReceive, setShowReceive] = useState(false);
@@ -92,19 +93,21 @@ const PurchaseOrderDetail = () => {
           </button>
           <h2>PO {po.poNumber}</h2>
         </div>
-        {canManage && !['received', 'cancelled'].includes(po.status) && (
+        {!['received', 'cancelled'].includes(po.status) && (
           <div className="action-btns">
-            {statusFlow[po.status] && (
+            {hasPermission(user, 'purchase-orders:edit') && statusFlow[po.status] && (
               <button className="btn btn-primary" onClick={() => handleStatusUpdate(statusFlow[po.status])}>
                 Mark as {statusFlow[po.status]}
               </button>
             )}
-            {canReceive && (
+            {hasPermission(user, 'purchase-orders:receive') && canReceive && (
               <button className="btn btn-success" onClick={openReceive} style={{ background: 'var(--success)', color: '#fff' }}>
                 Receive Delivery
               </button>
             )}
-            <button className="btn btn-danger" onClick={() => handleStatusUpdate('cancelled')}>Cancel PO</button>
+            {hasPermission(user, 'purchase-orders:edit') && (
+              <button className="btn btn-danger" onClick={() => handleStatusUpdate('cancelled')}>Cancel PO</button>
+            )}
           </div>
         )}
       </div>

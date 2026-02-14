@@ -9,6 +9,8 @@ import {
   TrendingUp, AlertTriangle, Sun, Moon, LogOut, User, Wifi, WifiOff, Bell,
   CheckCheck, Trash2, BellOff, Info, X,
 } from 'lucide-react';
+import { Shield } from 'lucide-react';
+import { hasAnyRole } from '../utils/rbac';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
@@ -159,7 +161,13 @@ const Layout = () => {
                 <User size={16} />
               </button>
 
-              <button className="profile-menu-btn" onClick={toggleTheme} data-tooltip-id="sidebar-tooltip" data-tooltip-content={isDark ? 'Light Mode' : 'Dark Mode'}>
+              {hasAnyRole(user, ['owner','manager']) && (
+                <button className="profile-menu-btn" onClick={() => navigate('/roles')} data-tooltip-id="sidebar-tooltip" data-tooltip-content="Roles & Permissions">
+                  <Shield size={16} />
+                </button>
+              )}
+
+              <button className="profile-menu-btn" onClick={toggleTheme} data-tooltip-id="sidebar-tooltip" data-tooltip-content={`Switch to ${isDark ? 'Light Mode' : 'Dark Mode'}`}>
                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
               <button className="profile-menu-btn logout" onClick={handleLogout} data-tooltip-id="sidebar-tooltip" data-tooltip-content="Logout">

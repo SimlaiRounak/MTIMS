@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const { User } = require('../models');
+const { getUserPermissions } = require('../utils/permissions');
 
 // Verify JWT and attach user + tenantId to request
 const auth = async (req, res, next) => {
@@ -52,4 +53,25 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { auth, authorize };
+// Permission-based authorization (checks tenant-specific custom permissions)
+const checkPermission = (permission) => {
+  return async (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required.' });
+    }
+    if (req.user.role === 'owner') return next();
+
+    try {
+      const perms = await getUserPermissions(req.tenantId, req.user.role);
+      if (perms.includes(permission)) return next();
+
+      return res.status(403).json({
+        error: 'You do not have permission to perform this action.',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+module.exports = { auth, authorize, checkPermission };

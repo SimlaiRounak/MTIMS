@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { purchaseOrdersAPI, suppliersAPI, productsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission } from '../utils/rbac';
 import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
 
@@ -15,7 +16,7 @@ const statusBadge = (status) => {
 
 const PurchaseOrders = () => {
   const navigate = useNavigate();
-  const { canManage } = useAuth();
+  const { user } = useAuth();
   const [pos, setPos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
@@ -102,7 +103,7 @@ const PurchaseOrders = () => {
     <div>
       <div className="page-header">
         <h2>Purchase Orders</h2>
-        {canManage && <button className="btn btn-primary" onClick={openCreate}>+ Create PO</button>}
+        {hasPermission(user, 'purchase-orders:create') && <button className="btn btn-primary" onClick={openCreate}>+ Create PO</button>}
       </div>
 
       <div className="card">

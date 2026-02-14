@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { suppliersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission } from '../utils/rbac';
 import Modal from '../components/Modal';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
 import toast from 'react-hot-toast';
 
 const Suppliers = () => {
-  const { canManage } = useAuth();
+  const { user } = useAuth();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -85,7 +86,7 @@ const Suppliers = () => {
     <div>
       <div className="page-header">
         <h2>Suppliers</h2>
-        {canManage && <button className="btn btn-primary" onClick={openCreate}>+ Add Supplier</button>}
+        {hasPermission(user, 'suppliers:create') && <button className="btn btn-primary" onClick={openCreate}>+ Add Supplier</button>}
       </div>
 
       <div className="card">
@@ -102,7 +103,7 @@ const Suppliers = () => {
           <div className="table-container">
             <table>
               <thead>
-                <tr><th>Name</th><th>Contact</th><th>Email</th><th>Phone</th><th>Location</th>{canManage && <th>Actions</th>}</tr>
+                <tr><th>Name</th><th>Contact</th><th>Email</th><th>Phone</th><th>Location</th>{hasPermission(user, 'suppliers:edit') && <th>Actions</th>}</tr>
               </thead>
               <tbody>
                 {suppliers.map((s) => (
@@ -112,17 +113,19 @@ const Suppliers = () => {
                     <td>{s.email || '—'}</td>
                     <td>{s.phone || '—'}</td>
                     <td>{[s.address?.city, s.address?.country].filter(Boolean).join(', ') || '—'}</td>
-                    {canManage && (
+                    {hasPermission(user, 'suppliers:edit') && (
                       <td>
                         <div className="action-btns">
                           <button className="table-action-btn edit" onClick={() => openEdit(s)}
                             data-tooltip-id="table-tooltip" data-tooltip-content="Edit">
                             <Pencil size={15} />
                           </button>
-                          <button className="table-action-btn delete" onClick={() => handleDelete(s._id)}
-                            data-tooltip-id="table-tooltip" data-tooltip-content="Delete">
-                            <Trash2 size={15} />
-                          </button>
+                          {hasPermission(user, 'suppliers:delete') && (
+                            <button className="table-action-btn delete" onClick={() => handleDelete(s._id)}
+                              data-tooltip-id="table-tooltip" data-tooltip-content="Delete">
+                              <Trash2 size={15} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     )}

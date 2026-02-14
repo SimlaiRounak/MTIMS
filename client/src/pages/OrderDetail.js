@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ordersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission } from '../utils/rbac';
 import toast from 'react-hot-toast';
 
 const statusBadge = (status) => {
@@ -15,7 +16,7 @@ const statusBadge = (status) => {
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { canManage } = useAuth();
+  const { user } = useAuth();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,14 +72,16 @@ const OrderDetail = () => {
           </button>
           <h2>Order {order.orderNumber}</h2>
         </div>
-        {canManage && !['cancelled', 'delivered'].includes(order.status) && (
+        {!['cancelled', 'delivered'].includes(order.status) && (
           <div className="action-btns">
-            {nextStatus[order.status] && (
+            {hasPermission(user, 'orders:edit') && nextStatus[order.status] && (
               <button className="btn btn-primary" onClick={() => handleStatusUpdate(nextStatus[order.status])}>
                 Mark as {nextStatus[order.status]}
               </button>
             )}
-            <button className="btn btn-danger" onClick={handleCancel}>Cancel Order</button>
+            {hasPermission(user, 'orders:cancel') && (
+              <button className="btn btn-danger" onClick={handleCancel}>Cancel Order</button>
+            )}
           </div>
         )}
       </div>

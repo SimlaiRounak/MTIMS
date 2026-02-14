@@ -15,6 +15,8 @@ import PurchaseOrderDetail from './pages/PurchaseOrderDetail';
 import StockMovements from './pages/StockMovements';
 import LowStockAlerts from './pages/LowStockAlerts';
 import Profile from './pages/Profile';
+import RolesPermissions from './pages/RolesPermissions';
+import RoleRoute from './components/RoleRoute';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -45,6 +47,7 @@ const App = () => {
         <Route path="stock-movements" element={<StockMovements />} />
         <Route path="low-stock" element={<LowStockAlerts />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="roles" element={<RoleRoute allowedRoles={["owner","manager"]}><RolesPermissions /></RoleRoute>} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

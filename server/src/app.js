@@ -13,6 +13,8 @@ const orderRoutes = require('./routes/orders');
 const supplierRoutes = require('./routes/suppliers');
 const purchaseOrderRoutes = require('./routes/purchaseOrders');
 const dashboardRoutes = require('./routes/dashboard');
+const userRoutes = require('./routes/users');
+const roleRoutes = require('./routes/roles');
 
 const app = express();
 
@@ -39,6 +41,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/purchase-orders', purchaseOrderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/roles', roleRoutes);
 
 // 404 handler
 app.use((req, res) => {

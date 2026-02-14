@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ordersAPI, productsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission } from '../utils/rbac';
 import { useSocket } from '../context/SocketContext';
 import Modal from '../components/Modal';
 import { ShoppingCart, Eye } from 'lucide-react';
@@ -17,7 +18,7 @@ const statusBadge = (status) => {
 };
 
 const Orders = () => {
-  const { canManage } = useAuth();
+  const { user } = useAuth();
   const { socket } = useSocket();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -115,7 +116,7 @@ const Orders = () => {
     <div>
       <div className="page-header">
         <h2>Orders</h2>
-        <button className="btn btn-primary" onClick={openCreateModal}>+ New Order</button>
+        {hasPermission(user, 'orders:create') && <button className="btn btn-primary" onClick={openCreateModal}>+ New Order</button>}
       </div>
 
       <div className="filter-bar">

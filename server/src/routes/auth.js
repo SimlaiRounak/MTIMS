@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const config = require('../config');
 const { Tenant, User } = require('../models');
 const { auth } = require('../middleware/auth');
+const { getUserPermissions } = require('../utils/permissions');
 const { asyncHandler } = require('../utils/helpers');
 const { AppError } = require('../middleware/errorHandler');
 
@@ -60,6 +61,7 @@ router.post(
     });
 
     const token = generateToken(user);
+    const permissions = await getUserPermissions(user.tenantId, user.role);
 
     res.status(201).json({
       token,
@@ -70,6 +72,7 @@ router.post(
         role: user.role,
         tenantId: tenant._id,
         tenantName: tenant.name,
+        permissions,
       },
     });
   })
@@ -107,6 +110,7 @@ router.post(
     }
 
     const token = generateToken(user);
+    const permissions = await getUserPermissions(user.tenantId, user.role);
 
     res.json({
       token,
@@ -117,6 +121,7 @@ router.post(
         role: user.role,
         tenantId: tenant._id,
         tenantName: tenant.name,
+        permissions,
       },
     });
   })
@@ -128,6 +133,7 @@ router.get(
   auth,
   asyncHandler(async (req, res) => {
     const tenant = await Tenant.findById(req.tenantId);
+    const permissions = await getUserPermissions(req.tenantId, req.user.role);
     res.json({
       user: {
         id: req.user._id,
@@ -136,6 +142,7 @@ router.get(
         role: req.user.role,
         tenantId: req.tenantId,
         tenantName: tenant?.name,
+        permissions,
       },
     });
   })
@@ -211,6 +218,7 @@ router.put(
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
     const tenant = await Tenant.findById(req.tenantId);
+    const permissions = await getUserPermissions(req.tenantId, user.role);
 
     res.json({
       user: {
@@ -220,6 +228,7 @@ router.put(
         role: user.role,
         tenantId: req.tenantId,
         tenantName: tenant?.name,
+        permissions,
       },
     });
   })

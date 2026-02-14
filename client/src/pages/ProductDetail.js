@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { productsAPI, stockAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { hasPermission } from '../utils/rbac';
 import Modal from '../components/Modal';
 import { Package, DollarSign, Tag, PackagePlus, Trash2 } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
@@ -10,7 +11,7 @@ import toast from 'react-hot-toast';
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { canManage } = useAuth();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAdjust, setShowAdjust] = useState(false);
@@ -121,15 +122,19 @@ const ProductDetail = () => {
           </button>
           <h2>{product.name}</h2>
         </div>
-        {canManage && (
-          <div className="action-btns">
+        <div className="action-btns">
+          {hasPermission(user, 'products:edit') && (
             <button className="btn btn-outline" onClick={() => setEditing(!editing)}>
               {editing ? 'Cancel Edit' : '✏️ Edit'}
             </button>
+          )}
+          {hasPermission(user, 'products:edit') && (
             <button className="btn btn-primary" onClick={() => setShowAddVariant(true)}>+ Add Variant</button>
+          )}
+          {hasPermission(user, 'stock:adjust') && (
             <button className="btn btn-success" onClick={() => setShowAdjust(true)}><PackagePlus size={16} style={{ marginRight: 4 }} /> Adjust Stock</button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Product Info */}
@@ -204,7 +209,7 @@ const ProductDetail = () => {
                 <th>Cost</th>
                 <th>Stock</th>
                 <th>Status</th>
-                {canManage && <th>Actions</th>}
+                {hasPermission(user, 'products:delete') && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -230,7 +235,7 @@ const ProductDetail = () => {
                       <span className="badge badge-success">In Stock</span>
                     )}
                   </td>
-                  {canManage && (
+                  {hasPermission(user, 'products:delete') && (
                     <td>
                       <button className="table-action-btn delete" onClick={() => handleDeleteVariant(v._id, v.sku)}
                         data-tooltip-id="table-tooltip" data-tooltip-content="Delete">
