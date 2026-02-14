@@ -8,7 +8,48 @@ const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// GET /api/purchase-orders
+/**
+ * @swagger
+ * /purchase-orders:
+ *   get:
+ *     summary: List purchase orders with pagination
+ *     tags: [Purchase Orders]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [draft, sent, confirmed, partially_received, received, cancelled]
+ *       - in: query
+ *         name: supplierId
+ *         schema:
+ *           type: string
+ *         description: Filter by supplier ID
+ *     responses:
+ *       200:
+ *         description: Paginated list of purchase orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 purchaseOrders:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/PurchaseOrder'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ */
 router.get(
   '/',
   auth,
@@ -45,7 +86,32 @@ router.get(
   })
 );
 
-// GET /api/purchase-orders/:id
+/**
+ * @swagger
+ * /purchase-orders/{id}:
+ *   get:
+ *     summary: Get a single purchase order by ID
+ *     tags: [Purchase Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Purchase Order ID
+ *     responses:
+ *       200:
+ *         description: Purchase order details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 purchaseOrder:
+ *                   $ref: '#/components/schemas/PurchaseOrder'
+ *       404:
+ *         description: Purchase order not found
+ */
 router.get(
   '/:id',
   auth,
@@ -68,7 +134,57 @@ router.get(
   })
 );
 
-// POST /api/purchase-orders - Create PO
+/**
+ * @swagger
+ * /purchase-orders:
+ *   post:
+ *     summary: Create a purchase order (owner/manager only)
+ *     tags: [Purchase Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [supplierId, items]
+ *             properties:
+ *               supplierId:
+ *                 type: string
+ *               items:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required: [variantId, productId, quantityOrdered, unitPrice]
+ *                   properties:
+ *                     variantId:
+ *                       type: string
+ *                     productId:
+ *                       type: string
+ *                     quantityOrdered:
+ *                       type: integer
+ *                       minimum: 1
+ *                     unitPrice:
+ *                       type: number
+ *                       minimum: 0
+ *               expectedDeliveryDate:
+ *                 type: string
+ *                 format: date-time
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Purchase order created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 purchaseOrder:
+ *                   $ref: '#/components/schemas/PurchaseOrder'
+ *       400:
+ *         description: Validation error
+ */
 router.post(
   '/',
   auth,
@@ -119,7 +235,45 @@ router.post(
   })
 );
 
-// PUT /api/purchase-orders/:id/status - Update PO status
+/**
+ * @swagger
+ * /purchase-orders/{id}/status:
+ *   put:
+ *     summary: Update purchase order status (owner/manager only)
+ *     tags: [Purchase Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Purchase Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [sent, confirmed, cancelled]
+ *     responses:
+ *       200:
+ *         description: Purchase order status updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 purchaseOrder:
+ *                   $ref: '#/components/schemas/PurchaseOrder'
+ *       400:
+ *         description: Invalid status transition
+ *       404:
+ *         description: Purchase order not found
+ */
 router.put(
   '/:id/status',
   auth,
@@ -168,7 +322,57 @@ router.put(
   })
 );
 
-// POST /api/purchase-orders/:id/receive - Receive delivery (partial supported)
+/**
+ * @swagger
+ * /purchase-orders/{id}/receive:
+ *   post:
+ *     summary: Receive a delivery for a purchase order (partial supported, owner/manager only)
+ *     tags: [Purchase Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Purchase Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [items]
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required: [variantId, quantityReceived]
+ *                   properties:
+ *                     variantId:
+ *                       type: string
+ *                     quantityReceived:
+ *                       type: integer
+ *                       minimum: 1
+ *                     actualUnitPrice:
+ *                       type: number
+ *                       minimum: 0
+ *     responses:
+ *       200:
+ *         description: Delivery received, stock updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 purchaseOrder:
+ *                   $ref: '#/components/schemas/PurchaseOrder'
+ *       400:
+ *         description: Exceeds ordered quantity or validation error
+ *       404:
+ *         description: PO not found or not in receivable status
+ */
 router.post(
   '/:id/receive',
   auth,

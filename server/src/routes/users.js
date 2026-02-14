@@ -7,7 +7,25 @@ const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// GET /api/users - List all users for this tenant (owner/manager only)
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: List all users for the tenant (owner/manager only)
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ */
 router.get(
   '/',
   auth,
@@ -22,7 +40,32 @@ router.get(
   })
 );
 
-// GET /api/users/:id - Get single user
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get a single user by ID (owner/manager only)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ */
 router.get(
   '/:id',
   auth,
@@ -43,7 +86,58 @@ router.get(
   })
 );
 
-// PUT /api/users/:id/role - Change user role (owner only)
+/**
+ * @swagger
+ * /users/{id}/role:
+ *   put:
+ *     summary: Change a user's role (owner only)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [role]
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [manager, staff]
+ *     responses:
+ *       200:
+ *         description: User role updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                     isActive:
+ *                       type: boolean
+ *       400:
+ *         description: Cannot change own role
+ *       403:
+ *         description: Cannot change an owner's role
+ *       404:
+ *         description: User not found
+ */
 router.put(
   '/:id/role',
   auth,
@@ -89,7 +183,57 @@ router.put(
   })
 );
 
-// PUT /api/users/:id/status - Activate/deactivate user (owner only)
+/**
+ * @swagger
+ * /users/{id}/status:
+ *   put:
+ *     summary: Activate or deactivate a user (owner only)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [isActive]
+ *             properties:
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: User status updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                     isActive:
+ *                       type: boolean
+ *       400:
+ *         description: Cannot deactivate own account
+ *       403:
+ *         description: Cannot deactivate an owner
+ *       404:
+ *         description: User not found
+ */
 router.put(
   '/:id/status',
   auth,
@@ -134,7 +278,37 @@ router.put(
   })
 );
 
-// DELETE /api/users/:id - Delete user (owner only)
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete a user (owner only)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted
+ *       400:
+ *         description: Cannot delete own account
+ *       403:
+ *         description: Cannot delete an owner
+ *       404:
+ *         description: User not found
+ */
 router.delete(
   '/:id',
   auth,

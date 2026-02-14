@@ -8,7 +8,46 @@ const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// POST /api/stock/adjust - Manual stock adjustment
+/**
+ * @swagger
+ * /stock/adjust:
+ *   post:
+ *     summary: Manual stock adjustment (owner/manager only)
+ *     tags: [Stock]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [variantId, quantity, type]
+ *             properties:
+ *               variantId:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *                 description: Positive to add, negative to subtract
+ *                 example: 10
+ *               type:
+ *                 type: string
+ *                 enum: [adjustment, return]
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Stock adjusted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 variant:
+ *                   $ref: '#/components/schemas/Variant'
+ *                 movement:
+ *                   $ref: '#/components/schemas/StockMovement'
+ *       400:
+ *         description: Variant not found or insufficient stock
+ */
 router.post(
   '/adjust',
   auth,
@@ -79,7 +118,57 @@ router.post(
   })
 );
 
-// GET /api/stock/movements - List stock movements
+/**
+ * @swagger
+ * /stock/movements:
+ *   get:
+ *     summary: List stock movements with pagination and filters
+ *     tags: [Stock]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *       - in: query
+ *         name: variantId
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [purchase, sale, return, adjustment]
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Paginated list of stock movements
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 movements:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/StockMovement'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ */
 router.get(
   '/movements',
   auth,
@@ -120,7 +209,25 @@ router.get(
   })
 );
 
-// GET /api/stock/low-stock - Low stock alerts (considers pending POs)
+/**
+ * @swagger
+ * /stock/low-stock:
+ *   get:
+ *     summary: Get low stock alerts with pending PO quantities
+ *     tags: [Stock]
+ *     responses:
+ *       200:
+ *         description: List of low-stock alerts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 alerts:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/LowStockAlert'
+ */
 router.get(
   '/low-stock',
   auth,

@@ -10,7 +10,28 @@ const {
 
 const router = express.Router();
 
-// GET /api/roles/permissions — Get permissions for all roles (any authenticated user)
+/**
+ * @swagger
+ * /roles/permissions:
+ *   get:
+ *     summary: Get permissions for all roles (any authenticated user)
+ *     tags: [Roles]
+ *     responses:
+ *       200:
+ *         description: Role permissions map
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 permissions:
+ *                   type: object
+ *                   description: Map of role to permission arrays
+ *                   additionalProperties:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ */
 router.get(
   '/permissions',
   auth,
@@ -20,7 +41,50 @@ router.get(
   })
 );
 
-// PUT /api/roles/:role/permissions — Update permissions for a role (owner only)
+/**
+ * @swagger
+ * /roles/{role}/permissions:
+ *   put:
+ *     summary: Update permissions for a role (owner only)
+ *     tags: [Roles]
+ *     parameters:
+ *       - in: path
+ *         name: role
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [manager, staff]
+ *         description: Role to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [permissions]
+ *             properties:
+ *               permissions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [products.view, orders.view, orders.create]
+ *     responses:
+ *       200:
+ *         description: Permissions updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 role:
+ *                   type: string
+ *                 permissions:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       400:
+ *         description: Invalid permissions or cannot modify owner
+ */
 router.put(
   '/:role/permissions',
   auth,

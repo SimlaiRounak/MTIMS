@@ -23,7 +23,20 @@ const setCache = (key, data) => {
   cache.set(key, { data, timestamp: Date.now() });
 };
 
-// GET /api/dashboard/summary
+/**
+ * @swagger
+ * /dashboard/summary:
+ *   get:
+ *     summary: Get dashboard summary (inventory, orders, alerts)
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Dashboard summary data (cached for 30s)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DashboardSummary'
+ */
 router.get(
   '/summary',
   auth,
@@ -132,7 +145,36 @@ router.get(
   })
 );
 
-// GET /api/dashboard/top-sellers - Top 5 products (30 days)
+/**
+ * @swagger
+ * /dashboard/top-sellers:
+ *   get:
+ *     summary: Get top 5 selling products (last 30 days)
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Top sellers list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topSellers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       productName:
+ *                         type: string
+ *                       totalQuantity:
+ *                         type: integer
+ *                       totalRevenue:
+ *                         type: number
+ *                       orderCount:
+ *                         type: integer
+ */
 router.get(
   '/top-sellers',
   auth,
@@ -173,7 +215,38 @@ router.get(
   })
 );
 
-// GET /api/dashboard/stock-movements - Movement graph (7 days)
+/**
+ * @swagger
+ * /dashboard/stock-movements:
+ *   get:
+ *     summary: Get stock movement graph data (last 7 days)
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Daily stock movement aggregations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 movements:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                         example: '2026-02-14'
+ *                       purchase:
+ *                         type: integer
+ *                       sale:
+ *                         type: integer
+ *                       return:
+ *                         type: integer
+ *                       adjustment:
+ *                         type: integer
+ */
 router.get(
   '/stock-movements',
   auth,

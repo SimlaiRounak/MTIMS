@@ -19,7 +19,56 @@ const generateToken = (user) => {
   );
 };
 
-// POST /api/auth/register - Register new tenant + owner
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new tenant and owner account
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [tenantName, name, email, password]
+ *             properties:
+ *               tenantName:
+ *                 type: string
+ *                 example: Acme Corp
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john@acme.com
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *                 example: secret123
+ *     responses:
+ *       201:
+ *         description: Tenant and owner created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/AuthUser'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       409:
+ *         description: Business name already exists
+ */
 router.post(
   '/register',
   [
@@ -78,7 +127,47 @@ router.post(
   })
 );
 
-// POST /api/auth/login
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Authenticate a user and get a JWT
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john@acme.com
+ *               password:
+ *                 type: string
+ *                 example: secret123
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/AuthUser'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Invalid credentials
+ *       403:
+ *         description: Tenant deactivated
+ */
 router.post(
   '/login',
   [
@@ -127,7 +216,25 @@ router.post(
   })
 );
 
-// GET /api/auth/me - Get current user
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current authenticated user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Current user info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/AuthUser'
+ *       401:
+ *         description: Not authenticated
+ */
 router.get(
   '/me',
   auth,
@@ -148,7 +255,50 @@ router.get(
   })
 );
 
-// POST /api/auth/users - Create user (Owner/Manager only)
+/**
+ * @swagger
+ * /auth/users:
+ *   post:
+ *     summary: Create a new user (owner/manager only)
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email, password, role]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Jane Staff
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: jane@acme.com
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *                 example: secret123
+ *               role:
+ *                 type: string
+ *                 enum: [manager, staff]
+ *                 example: staff
+ *     responses:
+ *       201:
+ *         description: User created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Forbidden
+ */
 router.post(
   '/users',
   auth,
@@ -187,7 +337,39 @@ router.post(
   })
 );
 
-// PUT /api/auth/profile - Update current user's profile
+/**
+ * @swagger
+ * /auth/profile:
+ *   put:
+ *     summary: Update current user's profile
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Profile updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/AuthUser'
+ *       400:
+ *         description: Validation error
+ *       409:
+ *         description: Email already in use
+ */
 router.put(
   '/profile',
   auth,
@@ -234,7 +416,41 @@ router.put(
   })
 );
 
-// PUT /api/auth/password - Change password
+/**
+ * @swagger
+ * /auth/password:
+ *   put:
+ *     summary: Change current user's password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 example: oldpass123
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *                 example: newpass456
+ *     responses:
+ *       200:
+ *         description: Password updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password updated successfully
+ *       400:
+ *         description: Current password incorrect or validation error
+ */
 router.put(
   '/password',
   auth,

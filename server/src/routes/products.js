@@ -7,7 +7,52 @@ const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// GET /api/products - List products with variants
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     summary: List products with variants and pagination
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by product name (case-insensitive)
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: active
+ *         schema:
+ *           type: string
+ *           enum: ['true', 'false']
+ *     responses:
+ *       200:
+ *         description: A paginated list of products with variants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ */
 router.get(
   '/',
   auth,
@@ -67,7 +112,26 @@ router.get(
   })
 );
 
-// GET /api/products/categories - Get unique categories
+/**
+ * @swagger
+ * /products/categories:
+ *   get:
+ *     summary: Get unique product categories for the tenant
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: List of category strings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 categories:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: [Apparel, Electronics]
+ */
 router.get(
   '/categories',
   auth,
@@ -80,7 +144,32 @@ router.get(
   })
 );
 
-// GET /api/products/:id - Get single product with variants
+/**
+ * @swagger
+ * /products/{id}:
+ *   get:
+ *     summary: Get a single product with its variants
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product with variants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Product not found
+ */
 router.get(
   '/:id',
   auth,
@@ -103,7 +192,75 @@ router.get(
   })
 );
 
-// POST /api/products - Create product with variants
+/**
+ * @swagger
+ * /products:
+ *   post:
+ *     summary: Create a product with variants (owner/manager only)
+ *     tags: [Products]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, basePrice, variants]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: T-Shirt
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *                 example: Apparel
+ *               basePrice:
+ *                 type: number
+ *                 minimum: 0
+ *                 example: 19.99
+ *               imageUrl:
+ *                 type: string
+ *               variantAttributes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: [size, color]
+ *               variants:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required: [price]
+ *                   properties:
+ *                     sku:
+ *                       type: string
+ *                     attributes:
+ *                       type: object
+ *                       additionalProperties:
+ *                         type: string
+ *                     price:
+ *                       type: number
+ *                       minimum: 0
+ *                     costPrice:
+ *                       type: number
+ *                     stock:
+ *                       type: integer
+ *                       minimum: 0
+ *                     lowStockThreshold:
+ *                       type: integer
+ *     responses:
+ *       201:
+ *         description: Product created with variants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Validation error
+ */
 router.post(
   '/',
   auth,
@@ -165,7 +322,54 @@ router.post(
   })
 );
 
-// PUT /api/products/:id - Update product
+/**
+ * @swagger
+ * /products/{id}:
+ *   put:
+ *     summary: Update a product (owner/manager only)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               basePrice:
+ *                 type: number
+ *               imageUrl:
+ *                 type: string
+ *               variantAttributes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Product updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 product:
+ *                   $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Product not found
+ */
 router.put(
   '/:id',
   auth,
@@ -207,7 +411,33 @@ router.put(
   })
 );
 
-// DELETE /api/products/:id - Delete product and all variants
+/**
+ * @swagger
+ * /products/{id}:
+ *   delete:
+ *     summary: Delete a product and all its variants (owner/manager only)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product and variants deleted
+ *       404:
+ *         description: Product not found
+ */
 router.delete(
   '/:id',
   auth,
@@ -237,7 +467,56 @@ router.delete(
   })
 );
 
-// POST /api/products/:id/variants - Add variant to product
+/**
+ * @swagger
+ * /products/{id}/variants:
+ *   post:
+ *     summary: Add a variant to a product (owner/manager only)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [price]
+ *             properties:
+ *               sku:
+ *                 type: string
+ *               attributes:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: string
+ *               price:
+ *                 type: number
+ *                 minimum: 0
+ *               costPrice:
+ *                 type: number
+ *               stock:
+ *                 type: integer
+ *                 minimum: 0
+ *               lowStockThreshold:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Variant created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 variant:
+ *                   $ref: '#/components/schemas/Variant'
+ *       404:
+ *         description: Product not found
+ */
 router.post(
   '/:id/variants',
   auth,
@@ -277,7 +556,52 @@ router.post(
   })
 );
 
-// PUT /api/variants/:id - Update variant
+/**
+ * @swagger
+ * /products/variants/{id}:
+ *   put:
+ *     summary: Update a variant (owner/manager only)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Variant ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sku:
+ *                 type: string
+ *               attributes:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: string
+ *               price:
+ *                 type: number
+ *               costPrice:
+ *                 type: number
+ *               lowStockThreshold:
+ *                 type: integer
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Variant updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 variant:
+ *                   $ref: '#/components/schemas/Variant'
+ *       404:
+ *         description: Variant not found
+ */
 router.put(
   '/variants/:id',
   auth,
@@ -306,7 +630,33 @@ router.put(
   })
 );
 
-// DELETE /api/variants/:id - Delete variant
+/**
+ * @swagger
+ * /products/variants/{id}:
+ *   delete:
+ *     summary: Delete a variant (owner/manager only)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Variant ID
+ *     responses:
+ *       200:
+ *         description: Variant deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Variant deleted
+ *       404:
+ *         description: Variant not found
+ */
 router.delete(
   '/variants/:id',
   auth,

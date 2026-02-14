@@ -8,7 +8,55 @@ const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// GET /api/orders - List orders
+/**
+ * @swagger
+ * /orders:
+ *   get:
+ *     summary: List orders with pagination and filters
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, confirmed, processing, shipped, delivered, cancelled]
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter orders created on or after this date
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter orders created on or before this date
+ *     responses:
+ *       200:
+ *         description: A paginated list of orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 orders:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Order'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ */
 router.get(
   '/',
   auth,
@@ -46,7 +94,32 @@ router.get(
   })
 );
 
-// GET /api/orders/:id - Get order details
+/**
+ * @swagger
+ * /orders/{id}:
+ *   get:
+ *     summary: Get a single order by ID
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Order details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Order not found
+ */
 router.get(
   '/:id',
   auth,
@@ -66,7 +139,54 @@ router.get(
   })
 );
 
-// POST /api/orders - Create order with atomic stock deduction
+/**
+ * @swagger
+ * /orders:
+ *   post:
+ *     summary: Create a new order (deducts stock atomically)
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [items]
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required: [variantId, quantity]
+ *                   properties:
+ *                     variantId:
+ *                       type: string
+ *                     quantity:
+ *                       type: integer
+ *                       minimum: 1
+ *               customerName:
+ *                 type: string
+ *               customerEmail:
+ *                 type: string
+ *                 format: email
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Order created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Validation error or insufficient stock
+ *       404:
+ *         description: Variant not found
+ */
 router.post(
   '/',
   auth,
@@ -205,7 +325,45 @@ router.post(
   })
 );
 
-// PUT /api/orders/:id/status - Update order status
+/**
+ * @swagger
+ * /orders/{id}/status:
+ *   put:
+ *     summary: Update order status (owner/manager only)
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [confirmed, processing, shipped, delivered]
+ *     responses:
+ *       200:
+ *         description: Order status updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Invalid status transition
+ *       404:
+ *         description: Order not found
+ */
 router.put(
   '/:id/status',
   auth,
@@ -246,7 +404,43 @@ router.put(
   })
 );
 
-// POST /api/orders/:id/cancel - Cancel order and restore stock
+/**
+ * @swagger
+ * /orders/{id}/cancel:
+ *   post:
+ *     summary: Cancel an order and restore stock (owner/manager only)
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 example: Customer requested cancellation
+ *     responses:
+ *       200:
+ *         description: Order cancelled, stock restored
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Order already cancelled or shipped/delivered
+ *       404:
+ *         description: Order not found
+ */
 router.post(
   '/:id/cancel',
   auth,

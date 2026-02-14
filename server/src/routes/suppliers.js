@@ -7,7 +7,48 @@ const { AppError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
-// GET /api/suppliers
+/**
+ * @swagger
+ * /suppliers:
+ *   get:
+ *     summary: List suppliers with pagination
+ *     tags: [Suppliers]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by supplier name
+ *       - in: query
+ *         name: active
+ *         schema:
+ *           type: string
+ *           enum: ['true', 'false']
+ *     responses:
+ *       200:
+ *         description: Paginated list of suppliers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 suppliers:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Supplier'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ */
 router.get(
   '/',
   auth,
@@ -45,7 +86,32 @@ router.get(
   })
 );
 
-// GET /api/suppliers/:id
+/**
+ * @swagger
+ * /suppliers/{id}:
+ *   get:
+ *     summary: Get a single supplier by ID
+ *     tags: [Suppliers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Supplier ID
+ *     responses:
+ *       200:
+ *         description: Supplier details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 supplier:
+ *                   $ref: '#/components/schemas/Supplier'
+ *       404:
+ *         description: Supplier not found
+ */
 router.get(
   '/:id',
   auth,
@@ -65,7 +131,56 @@ router.get(
   })
 );
 
-// POST /api/suppliers
+/**
+ * @swagger
+ * /suppliers:
+ *   post:
+ *     summary: Create a supplier (owner/manager only)
+ *     tags: [Suppliers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: GlobalTex Supplies
+ *               contactPerson:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     variantId:
+ *                       type: string
+ *                     unitPrice:
+ *                       type: number
+ *                     leadTimeDays:
+ *                       type: integer
+ *     responses:
+ *       201:
+ *         description: Supplier created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 supplier:
+ *                   $ref: '#/components/schemas/Supplier'
+ *       400:
+ *         description: Validation error
+ */
 router.post(
   '/',
   auth,
@@ -96,7 +211,62 @@ router.post(
   })
 );
 
-// PUT /api/suppliers/:id
+/**
+ * @swagger
+ * /suppliers/{id}:
+ *   put:
+ *     summary: Update a supplier (owner/manager only)
+ *     tags: [Suppliers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Supplier ID
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               contactPerson:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phone:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     variantId:
+ *                       type: string
+ *                     unitPrice:
+ *                       type: number
+ *                     leadTimeDays:
+ *                       type: integer
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Supplier updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 supplier:
+ *                   $ref: '#/components/schemas/Supplier'
+ *       404:
+ *         description: Supplier not found
+ */
 router.put(
   '/:id',
   auth,
@@ -126,7 +296,33 @@ router.put(
   })
 );
 
-// DELETE /api/suppliers/:id
+/**
+ * @swagger
+ * /suppliers/{id}:
+ *   delete:
+ *     summary: Delete a supplier (owner/manager only)
+ *     tags: [Suppliers]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Supplier ID
+ *     responses:
+ *       200:
+ *         description: Supplier deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Supplier deleted
+ *       404:
+ *         description: Supplier not found
+ */
 router.delete(
   '/:id',
   auth,
