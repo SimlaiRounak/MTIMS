@@ -16,8 +16,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      toast.success('Welcome back!');
+      const data = await login(form.email, form.password);
+      toast.success(`Welcome back, ${data.user?.name || ''}!`);
       navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Login failed');
@@ -30,7 +30,7 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-image" style={{ backgroundImage: `url(${process.env.PUBLIC_URL}/bg-stock-image.jpg)` }}>
         <div className="auth-image-text">
-          <h2>Welcome Back</h2>
+          <h2>Welcome!</h2>
           <p>Manage your inventory, suppliers, and orders — all in one place.</p>
         </div>
       </div>
@@ -67,9 +67,11 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </div>
         </form>
 
         <div className="switch-link">

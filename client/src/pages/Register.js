@@ -30,17 +30,17 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-image" style={{ backgroundImage: `url(${process.env.PUBLIC_URL}/bg-stock-image.jpg)` }}>
         <div className="auth-image-text">
-          <h2>Get Started</h2>
+          <h2>Get Started!</h2>
           <p>Create your business account and start managing inventory with full multi-tenant isolation.</p>
         </div>
       </div>
       <div className="auth-form-side">
         <button className="auth-theme-toggle" onClick={toggleTheme} title="Toggle theme">
-          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          {isDark ? <Moon size={18} /> : <Sun size={18} />}
         </button>
         <div className="auth-content">
-          <h1><Package size={24} style={{ verticalAlign: 'middle', marginRight: 8 }} />MTIMS</h1>
-          <p className="subtitle">Register your business</p>
+          <h1>MTIMS</h1>
+          <p className="subtitle">Multi-Tenant Inventory Management System</p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -92,9 +92,11 @@ const Register = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Registering...' : 'Register Business'}
-          </button>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+              {loading ? 'Registering...' : 'Register Business'}
+            </button>
+          </div>
         </form>
 
         <div className="switch-link">

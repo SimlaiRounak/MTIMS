@@ -757,6 +757,13 @@ tr:hover td {
   color: var(--gray-600);
 }
 
+/* Centered form actions for auth pages */
+.auth-form-side .auth-content .form-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
 /* ===== LOADING ===== */
 .loading-spinner {
   display: flex;
