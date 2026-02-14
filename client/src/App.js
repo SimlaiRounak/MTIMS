@@ -14,6 +14,7 @@ import PurchaseOrders from './pages/PurchaseOrders';
 import PurchaseOrderDetail from './pages/PurchaseOrderDetail';
 import StockMovements from './pages/StockMovements';
 import LowStockAlerts from './pages/LowStockAlerts';
+import Profile from './pages/Profile';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -43,6 +44,7 @@ const App = () => {
         <Route path="purchase-orders/:id" element={<PurchaseOrderDetail />} />
         <Route path="stock-movements" element={<StockMovements />} />
         <Route path="low-stock" element={<LowStockAlerts />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

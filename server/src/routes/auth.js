@@ -180,4 +180,76 @@ router.post(
   })
 );
 
+// PUT /api/auth/profile - Update current user's profile
+router.put(
+  '/profile',
+  auth,
+  [
+    body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
+    body('email').optional().isEmail().withMessage('Valid email is required'),
+  ],
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: 'Validation failed', details: errors.array() });
+    }
+
+    const updates = {};
+    if (req.body.name) updates.name = req.body.name;
+    if (req.body.email) updates.email = req.body.email;
+
+    if (updates.email) {
+      const existing = await User.findOne({
+        tenantId: req.tenantId,
+        email: updates.email,
+        _id: { $ne: req.user._id },
+      });
+      if (existing) {
+        throw new AppError('Email already in use by another user', 409);
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
+    const tenant = await Tenant.findById(req.tenantId);
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        tenantId: req.tenantId,
+        tenantName: tenant?.name,
+      },
+    });
+  })
+);
+
+// PUT /api/auth/password - Change password
+router.put(
+  '/password',
+  auth,
+  [
+    body('currentPassword').notEmpty().withMessage('Current password is required'),
+    body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters'),
+  ],
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: 'Validation failed', details: errors.array() });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    const isMatch = await user.comparePassword(req.body.currentPassword);
+    if (!isMatch) {
+      throw new AppError('Current password is incorrect', 400);
+    }
+
+    user.password = req.body.newPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  })
+);
+
 module.exports = router;
