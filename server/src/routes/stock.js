@@ -53,9 +53,9 @@ router.post(
   auth,
   authorize('owner', 'manager'),
   [
-    body('variantId').notEmpty().withMessage('Variant ID is required'),
-    body('quantity').isInt().withMessage('Quantity must be an integer'),
-    body('type').isIn(['adjustment', 'return']).withMessage('Type must be adjustment or return'),
+    body('variantId').notEmpty().withMessage('Please select a variant'),
+    body('quantity').isInt().withMessage('Quantity must be a whole number'),
+    body('type').isIn(['adjustment', 'return']).withMessage('Please select a valid adjustment type'),
     body('notes').optional().trim(),
   ],
   asyncHandler(async (req, res) => {
@@ -78,7 +78,7 @@ router.post(
     );
 
     if (!variant) {
-      throw new AppError('Variant not found or insufficient stock for negative adjustment', 400);
+      throw new AppError('Product variant not found or not enough stock available', 400);
     }
 
     // Record stock movement

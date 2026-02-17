@@ -44,7 +44,7 @@ export const SocketProvider = ({ children }) => {
 
     // Low stock alerts
     socket.on('stock:low', (data) => {
-      toast.error(`Low stock alert: ${data.sku} — only ${data.stock} left`, {
+      toast.error(data.stock === 0 ? `Low stock alert: ${data.sku} — out of stock` : `Low stock alert: ${data.sku} — only ${data.stock} left`, {
         duration: 6000,
       });
     });

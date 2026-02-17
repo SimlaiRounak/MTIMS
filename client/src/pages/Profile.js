@@ -134,7 +134,7 @@ const Profile = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'var(--gray-50)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--gray-200)' }}>
                   <Shield size={16} style={{ color: 'var(--gray-500)' }} />
                   <span style={{ color: 'var(--gray-600)', fontSize: '0.875rem' }}>
-                    {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)} — cannot be changed
+                    {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
                   </span>
                 </div>
               </div>

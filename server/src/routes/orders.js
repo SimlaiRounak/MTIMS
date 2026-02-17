@@ -191,11 +191,11 @@ router.post(
   '/',
   auth,
   [
-    body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
-    body('items.*.variantId').notEmpty().withMessage('Variant ID is required'),
-    body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be >= 1'),
+    body('items').isArray({ min: 1 }).withMessage('Please add at least one item to the order'),
+    body('items.*.variantId').notEmpty().withMessage('Please select a product variant for each item'),
+    body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
     body('customerName').optional().trim(),
-    body('customerEmail').optional().isEmail(),
+    body('customerEmail').optional().isEmail().withMessage('Please enter a valid email address'),
   ],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
@@ -368,7 +368,7 @@ router.put(
   '/:id/status',
   auth,
   authorize('owner', 'manager'),
-  [body('status').isIn(['confirmed', 'processing', 'shipped', 'delivered']).withMessage('Invalid status')],
+  [body('status').isIn(['confirmed', 'processing', 'shipped', 'delivered']).withMessage('Please select a valid order status')],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -306,7 +306,7 @@ router.post(
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    body('role').isIn(['manager', 'staff']).withMessage('Role must be manager or staff'),
+    body('role').isIn(['manager', 'staff']).withMessage('Please select a valid role (Manager or Staff)'),
   ],
   asyncHandler(async (req, res) => {
     if (!['owner', 'manager'].includes(req.user.role)) {

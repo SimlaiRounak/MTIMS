@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle auth errors globally
+// Handle auth errors globally and format validation errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -27,6 +27,13 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+
+    // If the server returned validation details, build a readable error message
+    const data = error.response?.data;
+    if (data?.details && Array.isArray(data.details) && data.details.length > 0) {
+      data.error = data.details.map((d) => d.msg).join('. ');
+    }
+
     return Promise.reject(error);
   }
 );

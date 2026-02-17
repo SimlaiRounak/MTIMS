@@ -43,7 +43,7 @@ const Notifications = () => {
         id: Date.now() + Math.random(),
         type: 'low-stock',
         title: 'Low Stock Alert',
-        message: `${data.sku} — only ${data.stock} units left`,
+        message: data.stock === 0 ? `${data.sku} — out of stock` : `${data.sku} — only ${data.stock} units left`,
         timestamp: new Date().toISOString(),
         read: false,
       });

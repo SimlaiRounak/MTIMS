@@ -16,7 +16,7 @@ const LowStockAlerts = () => {
     setLoading(true);
     try {
       const { data } = await stockAPI.getLowStock();
-      setAlerts(data.lowStockItems || []);
+      setAlerts(data.alerts || []);
     } catch {
       toast.error('Failed to load low stock alerts');
     } finally {
@@ -97,16 +97,17 @@ const LowStockAlerts = () => {
               </thead>
               <tbody>
                 {alerts.map((item) => {
-                  const netAfterPO = item.currentStock + (item.pendingPOQuantity || 0);
+                  const currentStock = item.stock ?? 0;
+                  const netAfterPO = currentStock + (item.pendingPOQuantity || 0);
                   const stillLow = netAfterPO <= (item.lowStockThreshold || 10);
                   return (
-                    <tr key={item.variantId}>
+                    <tr key={item._id}>
                       <td>{severityBadge(item.severity)}</td>
-                      <td>{item.productName}</td>
+                      <td>{item.productId?.name || '—'}</td>
                       <td><span className="badge badge-gray">{item.sku}</span></td>
                       <td>
-                        <strong style={{ color: item.currentStock === 0 ? 'var(--danger)' : 'var(--warning)' }}>
-                          {item.currentStock}
+                        <strong style={{ color: currentStock === 0 ? 'var(--danger)' : 'var(--warning)' }}>
+                          {currentStock}
                         </strong>
                       </td>
                       <td>{item.lowStockThreshold}</td>
@@ -123,7 +124,7 @@ const LowStockAlerts = () => {
                         </span>
                       </td>
                       <td>
-                        <button className="table-action-btn view" onClick={() => navigate(`/products/${item.productId}`)}
+                        <button className="table-action-btn view" onClick={() => navigate(`/products/${item.productId?._id}`)}
                           data-tooltip-id="table-tooltip" data-tooltip-content="View Product">
                           <Eye size={15} />
                         </button>

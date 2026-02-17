@@ -187,7 +187,7 @@ router.post(
   authorize('owner', 'manager'),
   [
     body('name').trim().notEmpty().withMessage('Supplier name is required'),
-    body('email').optional().isEmail().withMessage('Valid email required'),
+    body('email').optional().isEmail().withMessage('Please enter a valid email address'),
   ],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);

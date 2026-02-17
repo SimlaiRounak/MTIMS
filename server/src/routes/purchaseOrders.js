@@ -190,12 +190,12 @@ router.post(
   auth,
   authorize('owner', 'manager'),
   [
-    body('supplierId').notEmpty().withMessage('Supplier is required'),
-    body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
-    body('items.*.variantId').notEmpty().withMessage('Variant ID is required'),
-    body('items.*.productId').notEmpty().withMessage('Product ID is required'),
-    body('items.*.quantityOrdered').isInt({ min: 1 }).withMessage('Quantity must be >= 1'),
-    body('items.*.unitPrice').isFloat({ min: 0 }).withMessage('Unit price must be >= 0'),
+    body('supplierId').notEmpty().withMessage('Please select a supplier'),
+    body('items').isArray({ min: 1 }).withMessage('Please add at least one item'),
+    body('items.*.variantId').notEmpty().withMessage('Please select a product variant for each item'),
+    body('items.*.productId').notEmpty().withMessage('Please select a product for each item'),
+    body('items.*.quantityOrdered').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    body('items.*.unitPrice').isFloat({ min: 0 }).withMessage('Unit price cannot be negative'),
   ],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
@@ -278,7 +278,7 @@ router.put(
   '/:id/status',
   auth,
   authorize('owner', 'manager'),
-  [body('status').isIn(['sent', 'confirmed', 'cancelled']).withMessage('Invalid status transition')],
+  [body('status').isIn(['sent', 'confirmed', 'cancelled']).withMessage('Please select a valid status')],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -378,10 +378,10 @@ router.post(
   auth,
   authorize('owner', 'manager'),
   [
-    body('items').isArray({ min: 1 }).withMessage('At least one item to receive'),
-    body('items.*.variantId').notEmpty(),
-    body('items.*.quantityReceived').isInt({ min: 1 }),
-    body('items.*.actualUnitPrice').optional().isFloat({ min: 0 }),
+    body('items').isArray({ min: 1 }).withMessage('Please select at least one item to receive'),
+    body('items.*.variantId').notEmpty().withMessage('Please select a product variant for each item'),
+    body('items.*.quantityReceived').isInt({ min: 1 }).withMessage('Received quantity must be at least 1'),
+    body('items.*.actualUnitPrice').optional().isFloat({ min: 0 }).withMessage('Actual unit price cannot be negative'),
   ],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
@@ -412,13 +412,13 @@ router.post(
         );
 
         if (!poItem) {
-          throw new AppError(`Variant ${received.variantId} not in this PO`, 400);
+          throw new AppError('One of the received items does not belong to this purchase order', 400);
         }
 
         const remainingToReceive = poItem.quantityOrdered - poItem.quantityReceived;
         if (received.quantityReceived > remainingToReceive) {
           throw new AppError(
-            `Cannot receive ${received.quantityReceived} for variant ${received.variantId}. Only ${remainingToReceive} remaining.`,
+            `Cannot receive ${received.quantityReceived} units — only ${remainingToReceive} remaining to be received`,
             400
           );
         }

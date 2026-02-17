@@ -142,7 +142,7 @@ router.put(
   '/:id/role',
   auth,
   authorize('owner'),
-  [body('role').isIn(['manager', 'staff']).withMessage('Role must be manager or staff')],
+  [body('role').isIn(['manager', 'staff']).withMessage('Please select a valid role (Manager or Staff)')],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -238,7 +238,7 @@ router.put(
   '/:id/status',
   auth,
   authorize('owner'),
-  [body('isActive').isBoolean().withMessage('isActive must be a boolean')],
+  [body('isActive').isBoolean().withMessage('Please provide a valid active status')],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

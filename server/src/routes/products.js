@@ -267,10 +267,10 @@ router.post(
   authorize('owner', 'manager'),
   [
     body('name').trim().notEmpty().withMessage('Product name is required'),
-    body('basePrice').isFloat({ min: 0 }).withMessage('Base price must be >= 0'),
-    body('variants').isArray({ min: 1 }).withMessage('At least one variant is required'),
-    body('variants.*.price').isFloat({ min: 0 }).withMessage('Variant price must be >= 0'),
-    body('variants.*.stock').optional().isInt({ min: 0 }),
+    body('basePrice').isFloat({ min: 0 }).withMessage('Base price cannot be negative'),
+    body('variants').isArray({ min: 1 }).withMessage('Please add at least one variant'),
+    body('variants.*.price').isFloat({ min: 0 }).withMessage('Variant price cannot be negative'),
+    body('variants.*.stock').optional().isInt({ min: 0 }).withMessage('Stock cannot be negative'),
   ],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
@@ -522,7 +522,7 @@ router.post(
   auth,
   authorize('owner', 'manager'),
   [
-    body('price').isFloat({ min: 0 }).withMessage('Price must be >= 0'),
+    body('price').isFloat({ min: 0 }).withMessage('Price cannot be negative'),
   ],
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
